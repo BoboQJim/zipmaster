@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://zipmaster.squoosh.online/favicon.ico">
+    <title>ZipMaster Global | Secure Online File Compressor & Extractor</title>
+    <meta name="description" content="Free, secure, and fast online tool to compress and unzip files. No file upload required - process everything locally in your browser. Best Zip/Unzip tool.">
+    <meta name="keywords" content="online zip, unzip online, file compressor, extract zip file, secure file tool, client-side compression">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="ZipMaster Global - Secure File Tool">
+    <meta property="og:description" content="Process files securely in your browser without uploading to any server.">
+    <meta property="og:type" content="website">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --bg-light: #f3f4f6;
+            --white: #ffffff;
+            --success: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        
+        body { background-color: var(--bg-light); color: var(--text-dark); line-height: 1.6; }
+        
+        /* Layout */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        
+        /* Header */
+        header { background: var(--white); box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        nav { display: flex; justify-content: space-between; align-items: center; height: 70px; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); text-decoration: none; }
+        .nav-links a { margin-left: 20px; text-decoration: none; color: var(--text-dark); font-weight: 500; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--primary-color); }
+
+        /* Hero / Tool Section */
+        .hero { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: var(--white); padding: 60px 0 100px; text-align: center; }
+        .hero h1 { font-size: 2.5rem; margin-bottom: 15px; }
+        .hero p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 40px; }
+
+        .tool-box {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: -60px auto 50px; /* Overlap hero */
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .tabs { display: flex; justify-content: center; margin-bottom: 30px; border-bottom: 2px solid #eee; }
+        .tab-btn {
+            background: none; border: none; padding: 10px 30px; font-size: 1rem; cursor: pointer; color: var(--text-light); border-bottom: 3px solid transparent; font-weight: 600;
+        }
+        .tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
+
+        .drop-zone {
+            border: 2px dashed #cbd5e1; border-radius: 8px; padding: 50px 20px; transition: 0.3s; cursor: pointer; background: #f8fafc;
+        }
+        .drop-zone:hover, .drop-zone.dragover { border-color: var(--primary-color); background: #eff6ff; }
+        .drop-zone i { font-size: 3rem; color: var(--primary-color); margin-bottom: 15px; display: block; }
+        .btn-upload {
+            background: var(--primary-color); color: var(--white); padding: 12px 30px; border-radius: 6px; border: none; font-size: 1rem; cursor: pointer; margin-top: 15px; transition: 0.3s;
+        }
+        .btn-upload:hover { background: var(--secondary-color); }
+        
+        #fileInput { display: none; }
+        
+        .status-area { margin-top: 20px; text-align: left; display: none; }
+        .file-item { background: #f1f5f9; padding: 10px; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .action-area { margin-top: 20px; }
+
+        /* Content Sections for SEO */
+        .section-content { padding: 60px 0; }
+        .section-title { text-align: center; margin-bottom: 40px; font-size: 2rem; color: var(--text-dark); }
+        
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .feature-card { background: var(--white); padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.3s; }
+        .feature-card:hover { transform: translateY(-5px); }
+        .feature-card h3 { margin-bottom: 15px; color: var(--primary-color); }
+
+        .seo-text { max-width: 900px; margin: 0 auto; text-align: left; }
+        .seo-text h2 { margin-top: 30px; margin-bottom: 15px; font-size: 1.5rem; }
+        .seo-text p { margin-bottom: 15px; }
+
+        /* Legal / Footer */
+        footer { background: #111827; color: #9ca3af; padding: 50px 0 20px; margin-top: 50px; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 40px; }
+        .footer-col h4 { color: var(--white); margin-bottom: 20px; }
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 10px; }
+        .footer-col a { color: #9ca3af; text-decoration: none; }
+        .footer-col a:hover { color: var(--white); }
+        .copyright { text-align: center; border-top: 1px solid #374151; padding-top: 20px; font-size: 0.9rem; }
+
+        /* Policy Modal (Hidden by default) */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-content { background: var(--white); margin: 5% auto; padding: 40px; width: 80%; max-width: 800px; border-radius: 8px; max-height: 80vh; overflow-y: auto; position: relative; }
+        .close-modal { position: absolute; right: 20px; top: 20px; font-size: 24px; cursor: pointer; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 1.8rem; }
+            .tool-box { padding: 20px; margin-top: -30px; }
+            .nav-links { display: none; } /* Simplified for mobile */
+        }
+    </style>
+	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5612434384082476"
+     crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <nav>
+                <a href="#" class="logo">ZipMaster<span style="color:var(--text-dark)">Global</span></a>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#why-us">Why Us</a>
+                    <a href="#faq">FAQ</a>
+                    <a href="#" onclick="openModal('policy')">Privacy Policy</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Secure Online File Compression Tool</h1>
+            <p>Compress files or Extract ZIPs instantly in your browser. <br>No file uploads. 100% Private.</p>
+        </div>
+    </section>
+
+    <main class="container">
+        <div class="tool-box">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchMode('compress')">Compress (Zip)</button>
+                <button class="tab-btn" onclick="switchMode('extract')">Decompress (Unzip)</button>
+            </div>
+
+            <div class="drop-zone" id="dropZone">
+                <div id="dropContent">
+                    <span style="font-size: 3rem;">📂</span>
+                    <h3>Drag & Drop files here</h3>
+                    <p style="color: #666; margin: 10px 0;">or click to browse</p>
+                    <button class="btn-upload" onclick="document.getElementById('fileInput').click()">Select Files</button>
+                    <input type="file" id="fileInput" multiple>
+                </div>
+            </div>
+
+            <div id="statusArea" class="status-area">
+                <h4>Selected Files:</h4>
+                <div id="fileList"></div>
+                
+                <div class="action-area">
+                    <button id="actionBtn" class="btn-upload" style="width: 100%; background-color: var(--success);">Start Processing</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <section id="features" class="section-content" style="background: white;">
+        <div class="container">
+            <h2 class="section-title">Key Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>🔒 100% Secure & Private</h3>
+                    <p>We use Client-Side technology. Your files never leave your browser and are never uploaded to any server. Complete data privacy compliant with GDPR.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>⚡ Lightning Fast</h3>
+                    <p>Since there is no upload or download speed limit involved with a server, the compression happens instantly using your device's processing power.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🌍 No Limits</h3>
+                    <p>Compress unlimited files. No daily restrictions, no sign-up required, and completely free to use for users worldwide.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="why-us" class="section-content">
+        <div class="container seo-text">
+            <h2 class="section-title">Why Use ZipMaster Global?</h2>
+            
+            <h3>The Best Online Zip & Unzip Tool</h3>
+            <p>ZipMaster Global provides a seamless way to manage your archive files. Whether you need to bundle multiple documents into a single ZIP file for email attachments or extract content from a downloaded archive, our tool handles it efficiently.</p>
+
+            <h3>Compatible with All Platforms</h3>
+            <p>Our web-based platform works flawlessly on Windows, Mac, Linux, Android, and iOS. You don't need to install heavy software like WinRAR or 7-Zip. Just open your browser (Chrome, Firefox, Safari, Edge) and start working.</p>
+
+            <h3>Understanding Compression Algorithms</h3>
+            <p>We utilize the standard Deflate algorithm ensuring high compatibility. Files compressed here can be opened on any operating system without issues.</p>
+        </div>
+    </section>
+
+    <section id="faq" class="section-content" style="background: white;">
+        <div class="container seo-text">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            
+            <h3>Is it safe to zip files online?</h3>
+            <p>Yes. Unlike other tools, ZipMaster Global does not send your files to the cloud. All processing happens locally in your web browser (JavaScript), ensuring your sensitive data remains on your device.</p>
+
+            <h3>What file formats are supported?</h3>
+            <p>Currently, we support creating standard <strong>.ZIP</strong> files and extracting <strong>.ZIP</strong> archives. We are working on adding support for .RAR and .7Z in future updates.</p>
+
+            <h3>Is there a file size limit?</h3>
+            <p>Technically, the limit depends on your browser's memory (RAM). For most modern devices, handling files up to 1GB is smooth. For extremely large files, desktop software might be recommended.</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>ZipMaster Global</h4>
+                    <p>The secure, client-side file compression utility for the modern web.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#faq">Help Center</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#" onclick="openModal('policy')">Privacy Policy</a></li>
+                        <li><a href="#" onclick="openModal('terms')">Terms of Service</a></li>
+                        <li><a href="#" onclick="openModal('dmca')">DMCA</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2025 ZipMaster Global. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <div id="legalModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Logic & Functionality ---
+
+        let currentMode = 'compress'; // or 'extract'
+        let filesToProcess = [];
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const statusArea = document.getElementById('statusArea');
+        const actionBtn = document.getElementById('actionBtn');
+
+        // Toggle Mode
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Reset
+            filesToProcess = [];
+            fileList.innerHTML = '';
+            statusArea.style.display = 'none';
+            fileInput.value = '';
+
+            // Update UI Text
+            if(mode === 'compress') {
+                actionBtn.textContent = 'Compress & Download ZIP';
+                document.getElementById('dropContent').querySelector('h3').textContent = 'Drag files to Zip';
+                fileInput.setAttribute('multiple', '');
+                fileInput.removeAttribute('accept'); // Accept all for zip
+            } else {
+                actionBtn.textContent = 'Extract Files';
+                document.getElementById('dropContent').querySelector('h3').textContent = 'Drag ZIP to Extract';
+                fileInput.removeAttribute('multiple'); // Usually unzip one at a time
+                fileInput.setAttribute('accept', '.zip, .rar'); 
+            }
+        }
+
+        // Drag & Drop Handlers
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            // Logic for Extract Mode (Only take the first valid zip)
+            if (currentMode === 'extract') {
+                if (files.length > 1) alert("Please select one ZIP file to extract.");
+                filesToProcess = [files[0]]; 
+            } else {
+                // Compress Mode - Add to existing or replace? Let's spread
+                filesToProcess = [...files];
+            }
+            
+            updateFileListUI();
+        }
+
+        function updateFileListUI() {
+            if (filesToProcess.length > 0) {
+                statusArea.style.display = 'block';
+                fileList.innerHTML = '';
+                filesToProcess.forEach(f => {
+                    const div = document.createElement('div');
+                    div.className = 'file-item';
+                    div.innerHTML = `<span>${f.name}</span> <span style="font-size:0.8rem; color:#666;">(${(f.size/1024).toFixed(1)} KB)</span>`;
+                    fileList.appendChild(div);
+                });
+            }
+        }
+
+        // Core Action Trigger
+        actionBtn.addEventListener('click', async () => {
+            if (filesToProcess.length === 0) return;
+            
+            actionBtn.textContent = 'Processing...';
+            actionBtn.disabled = true;
+
+            try {
+                if (currentMode === 'compress') {
+                    await compressFiles();
+                } else {
+                    await extractFiles();
+                }
+            } catch (err) {
+                console.error(err);
+                alert('An error occurred: ' + err.message);
+            } finally {
+                actionBtn.textContent = currentMode === 'compress' ? 'Compress & Download ZIP' : 'Extract Files';
+                actionBtn.disabled = false;
+            }
+        });
+
+        // Compression Logic
+        async function compressFiles() {
+            const zip = new JSZip();
+            
+            // Add files
+            filesToProcess.forEach(file => {
+                zip.file(file.name, file);
+            });
+
+            // Generate
+            const content = await zip.generateAsync({type:"blob"});
+            saveAs(content, "archive_zipmaster.zip");
+        }
+
+        // Extraction Logic
+        async function extractFiles() {
+            const file = filesToProcess[0];
+            const zip = new JSZip();
+            
+            const zipContent = await zip.loadAsync(file);
+            
+            // Clear list to show extracted files
+            fileList.innerHTML = '<h5>Extracted Files (Click to Download):</h5>';
+            
+            zipContent.forEach(async (relativePath, zipEntry) => {
+                if (zipEntry.dir) return; // Skip directories for simple UI
+
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                
+                const link = document.createElement('a');
+                link.textContent = "⬇ " + zipEntry.name;
+                link.style.cursor = "pointer";
+                link.style.color = "var(--primary-color)";
+                link.style.fontWeight = "bold";
+                
+                // Create download logic closure
+                link.onclick = async () => {
+                    const blob = await zipEntry.async("blob");
+                    saveAs(blob, zipEntry.name);
+                };
+
+                div.appendChild(link);
+                fileList.appendChild(div);
+            });
+            
+            actionBtn.style.display = 'none'; // Hide button after extraction
+        }
+
+
+        // --- Legal Modal Logic ---
+        const legalTexts = {
+            policy: `<h2>Privacy Policy</h2><p>Last Updated: November 2025</p><p>At ZipMaster Global, we prioritize your privacy. <strong>We do not collect any personal data.</strong></p><h3>Data Processing</h3><p>All file compression and extraction operations are performed locally on your device using client-side JavaScript. No files are ever uploaded to our servers.</p><h3>Cookies</h3><p>We do not use tracking cookies.</p>`,
+            terms: `<h2>Terms of Service</h2><p>By using ZipMaster Global, you agree to these terms.</p><p>1. <strong>Usage:</strong> You may use this tool for personal and commercial purposes free of charge.</p><p>2. <strong>Liability:</strong> We are not responsible for any data loss or corruption resulting from the use of this tool.</p>`,
+            dmca: `<h2>DMCA / Copyright</h2><p>Since ZipMaster Global does not host any user files on its servers (as all processing is client-side), we do not possess or distribute copyrighted material.</p>`
+        };
+
+        function openModal(type) {
+            document.getElementById('modalBody').innerHTML = legalTexts[type] || "Content not found.";
+            document.getElementById('legalModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('legalModal').style.display = 'none';
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('legalModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

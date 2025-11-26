@@ -1,0 +1,14 @@
+# Group 1: All User Agents
+User-agent: *
+Allow: /
+
+# Disallow crawling of resource files to save crawl budget (Optional, but good for pure tools)
+# Disallow: /cgi-bin/
+# Disallow: /private/
+
+# Explicitly allow Googlebot for better SEO
+User-agent: Googlebot
+Allow: /
+
+# Sitemap Location
+Sitemap: https://zipmaster.squoosh.online/sitemap.xml
