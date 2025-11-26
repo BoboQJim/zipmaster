@@ -11,4 +11,4 @@ User-agent: Googlebot
 Allow: /
 
 # Sitemap Location
-Sitemap: https://zipmaster.squoosh.online/sitemap.xml
+Sitemap: https://zipcompress.squoosh.online/sitemap.xml

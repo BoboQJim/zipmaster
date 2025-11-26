@@ -5,14 +5,35 @@
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
     <url>
-        <loc>https://zipmaster.squoosh.online/</loc>
+        <loc>https://zipcompress.squoosh.online/</loc>
         <lastmod>2025-11-26</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.00</priority>
     </url>
 
     <url>
-        <loc>https://zipmaster.squoosh.online/index.html</loc>
+        <loc>https://zipcompress.squoosh.online/#features</loc>
+        <lastmod>2025-11-26</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.00</priority>
+    </url>
+	
+    <url>
+        <loc>https://zipcompress.squoosh.online/#why-us</loc>
+        <lastmod>2025-11-26</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.00</priority>
+    </url>
+
+    <url>
+        <loc>https://zipcompress.squoosh.online/#faq</loc>
+        <lastmod>2025-11-26</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.00</priority>
+    </url>
+
+    <url>
+        <loc>https://zipcompress.squoosh.online/index.html</loc>
         <lastmod>2025-11-26</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.80</priority>
